@@ -37,7 +37,7 @@
                (.flatMap stream kv-mapper)))})
 
 
-(defn -main [& args]
+(defn word-count-example [broker-connect zoo-keeper-connect]
   (let [props (Properties.)
         builder (KStreamBuilder.)
         string-serde (Serdes/String)
@@ -46,8 +46,8 @@
     ;; Use plain maps and Properties::putAll
     (doto props
       (.put StreamsConfig/APPLICATION_ID_CONFIG "wordcount-example")
-      (.put StreamsConfig/BOOTSTRAP_SERVERS_CONFIG "localhost:9092")
-      (.put StreamsConfig/ZOOKEEPER_CONNECT_CONFIG "localhost:2181")
+      (.put StreamsConfig/BOOTSTRAP_SERVERS_CONFIG broker-connect)
+      (.put StreamsConfig/ZOOKEEPER_CONNECT_CONFIG zoo-keeper-connect)
       (.put StreamsConfig/KEY_SERDE_CLASS_CONFIG (.. string-serde getClass getName))
       (.put StreamsConfig/VALUE_SERDE_CLASS_CONFIG (.. string-serde getClass getName)))
     
@@ -60,4 +60,7 @@
         (.to string-serde long-serde "WordsWithCountsTopic"))
     
     (.start (KafkaStreams. builder props))))
+
+(defn -main [& args]
+  (word-count-example  "localhost:9092",  "localhost:2181"))
 

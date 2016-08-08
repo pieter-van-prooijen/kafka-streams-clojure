@@ -4,7 +4,7 @@
     ;; Kafka streams is not yet in the main repos
   :repositories [["confluent" "http://packages.confluent.io/maven"]]
 
-  :jvm-opts ["-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005"]
+  ;;:jvm-opts ["-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005"]
   
   :main ^:skip-aot kafka-streams.word-count
   
