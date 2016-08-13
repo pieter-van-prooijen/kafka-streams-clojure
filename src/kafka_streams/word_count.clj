@@ -2,6 +2,7 @@
   (:refer-clojure :exclude [map mapcat])
   (:require [clojure.string :as string])
   (:import [java.util Properties]
+           [org.apache.kafka.clients.consumer ConsumerConfig]
            [org.apache.kafka.common.serialization Serdes]
            [org.apache.kafka.streams KafkaStreams StreamsConfig KeyValue]
            [org.apache.kafka.streams.kstream KStream KTable KStreamBuilder ValueMapper KeyValueMapper]))
@@ -45,22 +46,26 @@
 
     ;; Use plain maps and Properties::putAll
     (doto props
-      (.put StreamsConfig/APPLICATION_ID_CONFIG "wordcount-example")
+      (.put StreamsConfig/APPLICATION_ID_CONFIG "word-count-example")
+      (.put ConsumerConfig/AUTO_OFFSET_RESET_CONFIG "earliest")
       (.put StreamsConfig/BOOTSTRAP_SERVERS_CONFIG broker-connect)
       (.put StreamsConfig/ZOOKEEPER_CONNECT_CONFIG zoo-keeper-connect)
       (.put StreamsConfig/KEY_SERDE_CLASS_CONFIG (.. string-serde getClass getName))
-      (.put StreamsConfig/VALUE_SERDE_CLASS_CONFIG (.. string-serde getClass getName)))
+      (.put StreamsConfig/VALUE_SERDE_CLASS_CONFIG (.. string-serde getClass getName))
+      (.put StreamsConfig/STATE_DIR_CONFIG "/tmp/kafka-streams"))
     
     (-> (.stream builder string-serde string-serde (into-array ["TextLinesTopic"]))
 
         (mapcat (fn [[k s]] (for [word (string/split s #"\W+")] [k word])))
         (map (fn [[_ word]] [word word]))
-        (.countByKey "counts")
+        (.countByKey string-serde "counts")
         (.toStream)
         (.to string-serde long-serde "WordsWithCountsTopic"))
     
-    (.start (KafkaStreams. builder props))))
+    (KafkaStreams. builder props)))
 
 (defn -main [& args]
-  (word-count-example  "localhost:9092",  "localhost:2181"))
+  (let [streams (word-count-example  "localhost:9092",  "localhost:2181")]
+    (.start streams)
+    (.close streams)))
 

@@ -6,11 +6,21 @@
     </encoder>
   </appender>
 
+   <logger name="kafka.server.KafkaConfig" level="WARN" />
+
   <logger name="org.apache.kafka" level="INFO" />
+  
+  <logger name="org.apache.zookeeper.ZooKeeper" level="WARN" />
   <logger name="org.apache.zookeeper.ClientCnxn" level="INFO" />
   <logger name="org.apache.zookeeper.server" level="INFO" />
+  <logger name="org.apache.zookeeper.server.PrepRequestProcessor" level="WARN" />
+
   <logger name="org.apache.kafka.clients.consumer.ConsumerConfig" level="WARN" />
   <logger name="org.apache.kafka.clients.producer.ProducerConfig" level="WARN" />
+
+  <logger name="org.apache.kafka.clients.producer" level="INFO" />
+  <logger name="org.apache.kafka.clients.consumer" level="INFO" />
+  <logger name="org.apache.kafka.clients.consumer.internals.Fetcher" level="DEBUG" />
 
   <root level="DEBUG">
     <appender-ref ref="STDOUT"/>
