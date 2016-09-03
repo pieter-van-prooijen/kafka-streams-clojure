@@ -15,13 +15,14 @@
            [kafka.server KafkaConfig KafkaConfig$]))
 
 (defn delete-dir [path-dir]
-  (Files/walkFileTree path-dir (proxy [SimpleFileVisitor] []
-                                 (visitFile [path _]
-                                   (Files/delete path)
-                                   FileVisitResult/CONTINUE)
-                                 (postVisitDirectory [dir _]
-                                   (Files/delete dir)
-                                   FileVisitResult/CONTINUE))))
+  (when (Files/isReadable path-dir)
+    (Files/walkFileTree path-dir (proxy [SimpleFileVisitor] []
+                                   (visitFile [path _]
+                                     (Files/delete path)
+                                     FileVisitResult/CONTINUE)
+                                   (postVisitDirectory [dir _]
+                                     (Files/delete dir)
+                                     FileVisitResult/CONTINUE)))))
 
 (defrecord EmbeddedZooKeeper [server]
   component/Lifecycle
@@ -59,7 +60,7 @@
                                (assoc (.LogDirProp KafkaConfig$/MODULE$) (str log-dir-path)))]
       (-> component
           (assoc :log-dir-path log-dir-path)
-          (assoc :server (TestUtils/createServer (KafkaConfig. effective-config true) SystemTime$/MODULE$)))))
+          (assoc :server (TestUtils/createServer (KafkaConfig. effective-config true) kafka.utils.SystemTime$/MODULE$)))))
   (stop [component]
     (when-let [server (:server component)]
       (.shutdown server)
