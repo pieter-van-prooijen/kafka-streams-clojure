@@ -1,9 +1,9 @@
 (ns kafka-streams.core
   "Integrate Clojure with the kafka-streams library"
-  (:refer-clojure :exclude [map mapcat reduce])
+  (:refer-clojure :exclude [map mapcat reduce filter])
   (:import [java.util Properties]
-           [org.apache.kafka.streams KafkaStreams KeyValue]
-           [org.apache.kafka.streams.kstream KStream KTable ValueMapper KeyValueMapper Reducer]))
+           [org.apache.kafka.streams KeyValue]
+           [org.apache.kafka.streams.kstream KStream KTable ValueMapper KeyValueMapper Reducer Predicate]))
 
 (defprotocol StreamMethods
   "Clojure equivalents of various KStream methods, using plain functions for the transform on the stream."
@@ -15,14 +15,18 @@
   (reduce [stream f key-ser value-ser aggregate-name]
     "f takes two values as its argument and produces a new
     value. These are stored and serialized under their keys in the
-    KTable aggregate-name. Reduce returns a KTable"))
+    KTable aggregate-name. Reduce returns a KTable")
+  (filter [stream f]
+    "f is a predicate which takes a key and a value as arguments. Returns a KStream")
+  (select-key [stream f]
+    "f is a function which maps a key and a value to another key. Returns a KStream"))
 
 (extend KStream
   StreamMethods
   {:map (fn [stream f]
           (let [kv-mapper (reify KeyValueMapper (apply [_ k v]
                                                   (let [[k-result v-result] (f [k v])]
-                                                       (KeyValue. k-result v-result))))]
+                                                    (KeyValue. k-result v-result))))]
             (.map stream kv-mapper)))
 
    :mapcat (fn [stream f]
@@ -34,5 +38,15 @@
    :reduce (fn [stream f key-ser value-ser aggregate-name]
              (let [reducer (reify Reducer (apply [_ v1 v2]
                                             (f v1 v2)))]
-               (.reduceByKey stream reducer key-ser value-ser aggregate-name )))})
+               (.reduceByKey stream reducer key-ser value-ser aggregate-name )))
+
+   :filter (fn [stream f]
+             (let [kv-predicate (reify Predicate (test [_ k v]
+                                                   (f k v)) )]
+               (.filter stream kv-predicate)))
+
+   :select-key (fn [stream f]
+                 (let [kv-mapper (reify KeyValueMapper (apply [_ k v]
+                                                         (f [k v])))]
+                   (.selectKey stream kv-mapper)))})
 

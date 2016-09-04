@@ -2,10 +2,10 @@
   (:require [clojure.string :as string]
             [kafka-streams.core :as ks])
   (:import [java.util Properties]
-           [org.apache.kafka.clients.consumer ConsumerConfig]
            [org.apache.kafka.common.serialization Serdes]
-           [org.apache.kafka.streams KafkaStreams StreamsConfig KeyValue]
-           [org.apache.kafka.streams.kstream KStream KTable KStreamBuilder ValueMapper KeyValueMapper Reducer]))
+           [org.apache.kafka.clients.consumer ConsumerConfig]
+           [org.apache.kafka.streams KafkaStreams StreamsConfig]
+           [org.apache.kafka.streams.kstream KStreamBuilder]))
 
 
 
