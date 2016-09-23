@@ -12,6 +12,7 @@
   
   <logger name="org.apache.zookeeper.ZooKeeper" level="WARN" />
   <logger name="org.apache.zookeeper.ClientCnxn" level="INFO" />
+  <logger name="org.apache.zookeeper.ClientCnxnSocketNIO" level="INFO" />
   <logger name="org.apache.zookeeper.server" level="INFO" />
   <logger name="org.apache.zookeeper.server.PrepRequestProcessor" level="WARN" />
 

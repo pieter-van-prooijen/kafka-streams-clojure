@@ -3,7 +3,15 @@
   (:refer-clojure :exclude [map mapcat reduce filter])
   (:import [java.util Properties]
            [org.apache.kafka.streams KeyValue]
-           [org.apache.kafka.streams.kstream KStream KTable ValueMapper KeyValueMapper Reducer Predicate]))
+           [org.apache.kafka.streams.kstream KStream KTable ValueMapper KeyValueMapper
+            Reducer Predicate ValueJoiner]))
+
+(defprotocol KafkaStreamsProcess
+  "process the key value pair from the source in the processor context."
+  (process [k v ctx]))
+
+
+
 
 (defprotocol StreamMethods
   "Clojure equivalents of various KStream methods, using plain functions for the transform on the stream."
@@ -19,7 +27,9 @@
   (filter [stream f]
     "f is a predicate which takes a key and a value as arguments. Returns a KStream")
   (select-key [stream f]
-    "f is a function which maps a key and a value to another key. Returns a KStream"))
+    "f is a function which maps a key and a value to another key. Returns a KStream")
+  (left-join [stream-or-table table f]
+    "f is a function which take two values and returns the joined value. Returns a KStream or a KTable depending on the type of the first argument"))
 
 (extend KStream
   StreamMethods
@@ -48,5 +58,9 @@
    :select-key (fn [stream f]
                  (let [kv-mapper (reify KeyValueMapper (apply [_ k v]
                                                          (f [k v])))]
-                   (.selectKey stream kv-mapper)))})
+                   (.selectKey stream kv-mapper)))
+   :left-join (fn [stream-or-table table f]
+                (let [v-joiner (reify ValueJoiner (apply [_ stream-or-table-v table-v]
+                                                    (f stream-or-table table-v)))]
+                  (.leftJoin stream-or-table table v-joiner)))})
 

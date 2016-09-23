@@ -1,0 +1,27 @@
+* Kafka Streams
+
+No lookup method in KTable (*queryable tables in the next release*) ?
+
+* DDD
+(use lower level processor / store / source / sink topology to hook up aggregates)
+How to lookup aggregates in a KTable ?
+Routing commands to an aggregate / store (or use streams for that, see Commander pattern) (see metaDataForKey API)?
+Integrate the new timestamp feature of Kafka 0.10.0
+
+
+* Using transucers
+- kafka-streams processor module is push (invoke process(K, V)), not pull like in transducers / lazy seqs ?
+  in Processor::process, Use eduction with the xf's over a collection with a single item and iterate over the results passing
+  them along using ProcessorContext::forward()
+
+how to hook this in the KStream interface and underlying topology ?
+
+(process [k v]
+
+
+
+
+
+
+
+

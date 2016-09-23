@@ -4,7 +4,7 @@
   ;; Kafka streams is not yet in the main repos
   :repositories [["confluent" "http://packages.confluent.io/maven"]]
 
-  :jvm-opts ["-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5050"]
+  ;;:jvm-opts ["-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5050"]
   
   :main ^:skip-aot kafka-streams.word-count
   
@@ -14,6 +14,8 @@
                  [com.stuartsierra/component "0.3.1"]
                  [org.clojure/tools.logging "0.3.1"]]
 
+  :java-source-paths ["src-java"]
+  
   :profiles {:dev {:dependencies [[org.apache.curator/curator-test "2.9.0" :exclusions [log4j]]
                                   [org.apache.kafka/kafka_2.11 "0.10.0.0-cp1"
                                    :exclusions [org.slf4j/slf4j-api org.slf4j/slf4j-log4j12]]
